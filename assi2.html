@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+ 
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .dashboard-container {
+        max-width: 900px;
+        margin: 50px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container dashboard-container">
+      <div class="card shadow">
+        <div
+          class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+        >
+          <h4 class="mb-0">User Management Dashboard</h4>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title mb-3">Existing Users</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="userTable">
+              <thead class="table-light">
+                <tr>
+                  <th>Username</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+ 
+          <button
+            class="btn btn-success mt-3"
+            data-bs-toggle="modal"
+            data-bs-target="#newUserModal"
+          >
+            + Add New User
+          </button>
+        </div>
+      </div>
+    </div>
+ 
+    <div
+      class="modal fade"
+      id="newUserModal"
+      tabindex="-1"
+      aria-labelledby="newUserModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="newUserModalLabel">Add New User</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="addUserForm">
+              <div class="mb-3">
+                <label for="newUsername" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newUsername"
+                  placeholder="e.g. jdoe123"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="newFullname" class="form-label">Full Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newFullname"
+                  placeholder="e.g. John Doe"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="newEmail" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="newEmail"
+                  placeholder="e.g. john@example.com"
+                />
+              </div>
+              <div
+                id="formError"
+                class="text-danger small mb-2"
+                style="display: none"
+              >
+                All fields are required.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="saveUserBtn">
+              Save User
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ 
+    <script>
+      $(document).ready(function () {
+        // 1. Initial Data (Simulating a database)
+        let users = [];
+ 
+        // 2. Function to render the table
+        function renderUsers() {
+          const tbody = $("#userTableBody");
+          tbody.empty(); // Clear current list
+ 
+          users.forEach((user) => {
+            const row = `
+                        <tr>
+                            <td>${user.username}</td>
+                            <td>${user.fullname}</td>
+                            <td>${user.email}</td>
+                        </tr>
+                    `;
+            tbody.append(row);
+          });
+        }
+ 
+        // Initial render
+        renderUsers();
+ 
+        // 3. Handle "Save User" button click
+        $("#saveUserBtn").click(function () {
+          // Get values
+          const uname = $("#newUsername").val().trim();
+          const fname = $("#newFullname").val().trim();
+          const uemail = $("#newEmail").val().trim();
+ 
+          // Simple Validation
+          if (uname === "" || fname === "" || uemail === "") {
+            $("#formError").show();
+            return; // Stop execution
+          } else {
+            $("#formError").hide();
+          }
+ 
+          // Create new user object
+          const newUser = {
+            username: uname,
+            fullname: fname,
+            email: uemail,
+          };
+ 
+          // Add to data array
+          users.push(newUser);
+ 
+          // Update the display
+          renderUsers();
+ 
+          // 4. Cleanup
+          // Clear the form
+          $("#newUsername").val("");
+          $("#newFullname").val("");
+          $("#newEmail").val("");
+ 
+          // Close the modal (using Bootstrap 5 JS method via jQuery)
+          $("#newUserModal").modal("hide");
+        });
+      });
+    </script>
+  </body>
+</html>
