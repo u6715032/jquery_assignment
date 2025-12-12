@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interactive Web Form — Improved</title>
+
+  <!-- Prefer to split these into separate files (styles.css / script.js). For convenience the styles and script are included below. -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+  <style>
+    /* Error text style */
+    .error-text {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 3px;
+      display: block;
+    }
+
+    /* Small right-side inline error (for labels) */
+    .inline-error {
+      color: red;
+      font-size: 0.9rem;
+      margin-left: 10px;
+    }
+
+    /* Ensure invalid inputs have red border (Bootstrap provides .is-invalid but we keep this as well) */
+    .is-invalid {
+      border-color: #dc3545 !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h3 class="mb-4">Interactive Web Form</h3>
+
+        <form id="signupForm" novalidate>
+
+          <!-- Username -->
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" class="form-control" aria-describedby="usernameError">
+            <small id="usernameError" class="error-text" aria-live="polite"></small>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" class="form-control" aria-describedby="emailError">
+            <small id="emailError" class="error-text" aria-live="polite"></small>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" aria-describedby="passwordError">
+            <small id="passwordError" class="error-text" aria-live="polite"></small>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="form-control" aria-describedby="confirmPasswordError">
+            <small id="confirmPasswordError" class="error-text" aria-live="polite"></small>
+          </div>
+
+          <!-- Interesting Topics -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Interesting Topics
+              <span id="topicsError" class="inline-error" aria-live="polite"></span>
+            </label>
+
+            <div class="form-check">
+              <input class="form-check-input topic" type="checkbox" id="topic1" value="HTML">
+              <label class="form-check-label" for="topic1">HTML</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input topic" type="checkbox" id="topic2" value="CSS">
+              <label class="form-check-label" for="topic2">CSS</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input topic" type="checkbox" id="topic3" value="JavaScript">
+              <label class="form-check-label" for="topic3">JavaScript</label>
+            </div>
+          </div>
+
+          <!-- Gender -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Gender
+              <span id="genderError" class="inline-error" aria-live="polite"></span>
+            </label>
+            <select id="gender" class="form-select" aria-describedby="genderError">
+              <option value="">--</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Submit -->
+          <button id="submitBtn" type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Form validation script
+    (function () {
+      const form = document.getElementById('signupForm');
+      const username = document.getElementById('username');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      const confirmPassword = document.getElementById('confirmPassword');
+      const topics = Array.from(document.querySelectorAll('.topic'));
+      const gender = document.getElementById('gender');
+
+      function setError(input, message) {
+        if (input) {
+          input.classList.add('is-invalid');
+          const errEl = document.getElementById(input.id + 'Error');
+          if (errEl) errEl.textContent = message;
+        }
+      }
+
+      function clearError(input) {
+        if (input) {
+          input.classList.remove('is-invalid');
+          const errEl = document.getElementById(input.id + 'Error');
+          if (errEl) errEl.textContent = '';
+        }
+      }
+
+      function validateNotEmpty(input) {
+        const val = (input.value || '').trim();
+        if (!val) {
+          setError(input, 'this filed must not be empty');
+          return false;
+        }
+        clearError(input);
+        return true;
+      }
+
+      function validateTopics() {
+        const checked = topics.some(t => t.checked);
+        const errEl = document.getElementById('topicsError');
+        if (!checked) {
+          errEl.textContent = 'At least one topic must be selected';
+          return false;
+        }
+        errEl.textContent = '';
+        return true;
+      }
+
+      function validateGender() {
+        const errEl = document.getElementById('genderError');
+        if (!gender.value) {
+          errEl.textContent = 'please choose your gender';
+          return false;
+        }
+        errEl.textContent = '';
+        return true;
+      }
+
+      // Live validation on blur/change for required fields
+      [username, email, password, confirmPassword].forEach(el => {
+        el.addEventListener('blur', () => {
+          validateNotEmpty(el);
+          // If confirm password and both filled, also check mismatch live
+          if (el === confirmPassword) {
+            if (confirmPassword.value && password.value && confirmPassword.value !== password.value) {
+              setError(confirmPassword, 'confirmed password mismatched the password');
+            } else if (confirmPassword.value) {
+              // if it matched, clear the error only if not empty
+              if (confirmPassword.value === password.value) clearError(confirmPassword);
+            }
+          }
+        });
+      });
+
+      // Live validation on topic change
+      topics.forEach(t => t.addEventListener('change', validateTopics));
+
+      // Live validation on gender change
+      gender.addEventListener('change', validateGender);
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        let valid = true;
+
+        // Required fields
+        valid = validateNotEmpty(username) && valid;
+        valid = validateNotEmpty(email) && valid;
+        valid = validateNotEmpty(password) && valid;
+        valid = validateNotEmpty(confirmPassword) && valid;
+
+        // Topics and gender
+        valid = validateTopics() && valid;
+        valid = validateGender() && valid;
+
+        // Confirm password mismatch check (explicit requirement on submit)
+        if (confirmPassword.value && password.value && confirmPassword.value !== password.value) {
+          setError(confirmPassword, 'confirmed password mismatched the password');
+          valid = false;
+        }
+
+        if (!valid) {
+          // focus the first invalid element (nice UX)
+          const firstInvalid = form.querySelector('.is-invalid');
+          if (firstInvalid) firstInvalid.focus();
+          return;
+        }
+
+        // If valid: proceed (here we just show a success message)
+        // In real usage you'd submit the form via fetch/XHR or let the form post.
+        alert('Form submitted successfully ✅');
+        form.reset();
+
+        // Clear inline errors after reset
+        ['username', 'email', 'password', 'confirmPassword'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) clearError(el);
+        });
+        document.getElementById('topicsError').textContent = '';
+        document.getElementById('genderError').textContent = '';
+      });
+
+    }());
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
